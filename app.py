@@ -65,7 +65,7 @@ def vault():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    encryption_key = 'pass123'
+    encryption_key = os.environ.get("ENCRYPTION_KEY", "fallback-insecure") # Use environment variable for encryption key
     error = None
     cards = []
 
@@ -136,7 +136,7 @@ def decrypt_card(card_id):
     if 'userid' not in session or session['role'] not in ['admin', 'staff', 'auditor']:
         return redirect('/')
 
-    encryption_key = 'pass123'
+    encryption_key = os.environ.get("ENCRYPTION_KEY", "fallback-insecure")
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -188,7 +188,7 @@ def edit_card(card_id):
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    encryption_key = 'pass123'
+    encryption_key = os.environ.get("ENCRYPTION_KEY", "fallback-insecure") # Use environment variable for encryption key
 
     if request.method == 'POST':
         name = request.form['name']
@@ -259,8 +259,9 @@ def register():
             error = "This email is already registered."
 
     return render_template('register.html', error=error, success=success)
-
-# Start server
+# start the Flask application
 if __name__ == '__main__':
-    app.run(debug=True)
-    
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=port, debug=debug)
