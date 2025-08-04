@@ -133,50 +133,49 @@
             <button type="submit">Save</button>
         </form>
     {% endif %}
-
     <h3>Stored Cards:</h3>
-    <table>
-        <tr>
-            {% for col in range(cards[0]|length) %}
-                <th>Field {{ col + 1 }}</th>
-            {% endfor %}
-            {% if role in ['admin', 'staff', 'auditor'] %}
-                <th>Decrypt</th>
-            {% endif %}
-            {% if role == 'admin' %}
-                <th>Edit</th>
-                <th>Delete</th>
-            {% endif %}
-        </tr>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Card Number</th>
+        <th>CVV</th>
+        <th>Name</th>
+        <th>Billing Address</th>
+        {% if role in ['admin', 'staff', 'auditor'] %}
+            <th>Decrypt</th>
+        {% endif %}
+        {% if role == 'admin' %}
+            <th>Edit</th>
+            <th>Delete</th>
+        {% endif %}
+    </tr>
 
-        {% for row in cards %}
-        <tr>
-            {% for item in row %}
-                <td>
-                    {% if item is string and item.startswith("b'") %}
-                        {{ item[2:-1] }}
-                    {% else %}
-                        {{ item }}
-                    {% endif %}
-                </td>
-            {% endfor %}
-
-            {% if role in ['admin', 'staff', 'auditor'] %}
-                <td><a href="/decrypt/{{ row[0] }}">Decrypt</a></td>
-            {% endif %}
-
-            {% if role == 'admin' %}
-                <td><a href="/edit/{{ row[0] }}">Edit</a></td>
-                <td>
-                    <form method="POST" action="/delete/{{ row[0] }}" onsubmit="return confirm('Delete this card?');" class="delete-form">
-                        <button type="submit" >Delete</button>
-                    </form>
-                </td>
-            {% endif %}
-        </tr>
+    {% for row in cards %}
+    <tr>
+        {% for item in row %}
+            <td>
+                {% if item is string and item.startswith("b'") %}
+                    {{ item[2:-1] }}
+                {% else %}
+                    {{ item }}
+                {% endif %}
+            </td>
         {% endfor %}
-    </table>
-
+        {% if role in ['admin', 'staff', 'auditor'] %}
+            <td><a href="/decrypt/{{ row[0] }}">Decrypt</a></td>
+        {% endif %}
+        {% if role == 'admin' %}
+            <td><a href="/edit/{{ row[0] }}">Edit</a></td>
+            <td>
+                <form method="POST" action="/delete/{{ row[0] }}" class="delete-form">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
     <a href="/dashboard" class="back-link">← Back to Dashboard</a>
 </body>
 </html>
