@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Card Vault</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f2f6fa;
+            color: #333;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 400px;
+            margin-bottom: 40px;
+        }
+
+        form label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        form input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .delete-form {
+            display: inline;
+            margin-left: 10px;
+            margin-top: 0;
+            padding: 0;
+            border: none; 
+            cursor: pointer;
+            background-color: #e407f0ff;
+            width: 100%;
+        }
+        form button {
+            background-color: #e43808ff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        form button:hover {
+            background-color: #f80707ff;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            max-width: 90%;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 12px;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        td a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            color: #555;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <h2>Card Vault - {{ role }}</h2>
+    <p>Welcome, {{ user }} (Role: {{ role }})</p>
+
+    {% if role in ['admin', 'staff', 'auditor'] %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <label>Card Number:</label>
+            <input type="text" name="card" maxlength="16" pattern="\d{13,16}" inputmode="numeric" autocomplete="cc-number" required>
+
+            <label>CVV:</label>
+            <input type="text" name="cvv" maxlength="3" pattern="\d{3}" inputmode="numeric" autocomplete="cc-csc" required>
+
+            <label>Name:</label>
+            <input type="text" name="name" required>
+
+            <label>Billing Address:</label>
+            <input type="text" name="address" required>
+
+            <button type="submit">Save</button>
+        </form>
+    {% endif %}
+
+    <h3>Stored Cards:</h3>
+    <table>
+        <tr>
+            {% for col in range(cards[0]|length) %}
+                <th>Field {{ col + 1 }}</th>
+            {% endfor %}
+            {% if role in ['admin', 'staff', 'auditor'] %}
+                <th>Decrypt</th>
+            {% endif %}
+            {% if role == 'admin' %}
+                <th>Edit</th>
+                <th>Delete</th>
+            {% endif %}
+        </tr>
+
+        {% for row in cards %}
+        <tr>
+            {% for item in row %}
+                <td>
+                    {% if item is string and item.startswith("b'") %}
+                        {{ item[2:-1] }}
+                    {% else %}
+                        {{ item }}
+                    {% endif %}
+                </td>
+            {% endfor %}
+
+            {% if role in ['admin', 'staff', 'auditor'] %}
+                <td><a href="/decrypt/{{ row[0] }}">Decrypt</a></td>
+            {% endif %}
+
+            {% if role == 'admin' %}
+                <td><a href="/edit/{{ row[0] }}">Edit</a></td>
+                <td>
+                    <form method="POST" action="/delete/{{ row[0] }}" onsubmit="return confirm('Delete this card?');" class="delete-form">
+                        <button type="submit" >Delete</button>
+                    </form>
+                </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+</body>
+</html>
